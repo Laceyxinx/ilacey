@@ -35,7 +35,7 @@
 | 🏠 **HOME** | 欢迎页、近期内容与生活存档 |
 | 📁 **WORKS** | 项目作品和 GitHub 入口 |
 | 🌸 **ABOUT** | 关于我、兴趣与个人关键词 |
-| 💌 **CONTACT** | 联系邮箱 |
+| 💌 **CONTACT** | 联系邮箱laceyjinxin@gmail.com |
 
 ## ✦ 设计亮点
 
@@ -82,7 +82,7 @@ ilacey/
 
 如果你有有趣的想法，或者只是想打个招呼：
 
-**Email:** [laceyjinxin@163.com](mailto:laceyjinxin@163.com)<br>
+**Email:** [laceyjinxin@163.com](mailto:laceyjinxin@gmail.com)<br>
 **GitHub:** [@Laceyxinx](https://github.com/Laceyxinx)
 
 ---
