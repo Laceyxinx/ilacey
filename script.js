@@ -134,3 +134,56 @@ document.querySelectorAll('button, a').forEach(element => {
   element.addEventListener('pointerenter', () => cursor.classList.add('hover'));
   element.addEventListener('pointerleave', () => cursor.classList.remove('hover'));
 });
+
+const travelBooks = [
+  { id: 'paris', number: '01', title: 'PARIS', year: '2025', intro: '巴黎旅行日志正在等待你的照片与故事。' },
+  { id: 'iceland', number: '02', title: 'ICELAND', year: '2025', intro: '冰岛旅行日志正在等待你的照片与故事。' },
+  { id: 'europe', number: '03', title: 'EUROPE', year: '2025', intro: '欧洲旅行日志正在等待你的照片与故事。' },
+  { id: 'asia', number: '04', title: 'ASIA', year: 'SOON', intro: '这本旅行日志还没有开始书写。' },
+  { id: 'moments', number: '05', title: 'LITTLE MOMENTS', year: 'SOON', intro: '这里将收藏路途中不起眼但舍不得忘记的瞬间。' }
+];
+const bookOverlay = document.getElementById('book-overlay');
+const bookTitle = document.getElementById('book-title');
+const bookNumber = document.getElementById('book-number');
+const bookYear = document.getElementById('book-year');
+const bookIntro = document.getElementById('book-intro');
+let openBookIndex = 0;
+
+function renderBook(index) {
+  openBookIndex = (index + travelBooks.length) % travelBooks.length;
+  const book = travelBooks[openBookIndex];
+  bookTitle.textContent = book.title;
+  bookNumber.textContent = book.number;
+  bookYear.textContent = book.year;
+  bookIntro.textContent = book.intro;
+}
+
+function openTravelBook(id) {
+  const index = travelBooks.findIndex(book => book.id === id);
+  renderBook(index < 0 ? 0 : index);
+  bookOverlay.classList.add('open');
+  bookOverlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('book-is-open');
+  document.querySelector('.book-close').focus();
+}
+
+function closeTravelBook() {
+  bookOverlay.classList.remove('open');
+  bookOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('book-is-open');
+}
+
+document.querySelectorAll('[data-book]').forEach(book => {
+  book.addEventListener('click', () => openTravelBook(book.dataset.book));
+});
+document.querySelector('.book-close').addEventListener('click', closeTravelBook);
+document.querySelector('.prev-page').addEventListener('click', () => renderBook(openBookIndex - 1));
+document.querySelector('.next-page').addEventListener('click', () => renderBook(openBookIndex + 1));
+bookOverlay.addEventListener('click', event => {
+  if (event.target === bookOverlay) closeTravelBook();
+});
+addEventListener('keydown', event => {
+  if (event.key === 'Escape' && bookOverlay.classList.contains('open')) closeTravelBook();
+  if (event.key === 'ArrowLeft' && bookOverlay.classList.contains('open')) renderBook(openBookIndex - 1);
+  if (event.key === 'ArrowRight' && bookOverlay.classList.contains('open')) renderBook(openBookIndex + 1);
+});

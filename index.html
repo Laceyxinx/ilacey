@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Lacey 骆锦昕的个人作品集"><title>Lacey 骆锦昕 — Digital Notebook</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css?v=20260831-2"></head>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Lacey 骆锦昕的个人作品集"><title>Lacey 骆锦昕 — Digital Notebook</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css?v=20260901-1"></head>
 <body>
 <main class="app-shell">
   <div class="announcement"><span>WELCOME TO MY LITTLE DIGITAL SPACE　✦</span><span>MADE WITH CURIOSITY &amp; A HAPPY HEART　♡</span><span>UPDATED 08.19</span></div>
@@ -27,11 +27,32 @@
         </div>
         <div class="section-title"><div><small>PERSONAL ARCHIVE</small><h3>我的生活存档 <em class="archive-status">（近期较忙暂未更新）</em></h3></div><span>♡</span></div>
         <div class="projects">
-          <button class="project"><div class="cover c1"><span>TRAVEL<br>LOG</span></div><small>01</small><b>旅行足迹</b><p>一个人去了很多地方，也认真留下了一些证据。</p></button>
+          <button class="project" data-page="travel"><div class="cover c1"><span>TRAVEL<br>LOG</span></div><small>01</small><b>旅行足迹</b><p>一个人去了很多地方，也认真留下了一些证据。</p></button>
           <button class="project"><div class="cover c2"><i></i><span>CULTURE<br>SHELF</span></div><small>02</small><b>我的文化货架</b><p>循环播放的音乐、舍不得删的电影，以及读完还在想的书。</p></button>
           <button class="project"><div class="cover c3"><span>LITTLE<br>THINGS</span></div><small>03</small><b>生活碎片</b><p>一些莫名其妙的胡思乱想与生活中渺小幸福的角落</p></button>
         </div>
         <div class="little-note"><b>★</b><p><small>A LITTLE NOTE</small>此人正在互联网游荡中</p></div>
+      </article>
+      <article class="page travel-page" data-content="travel">
+        <div class="travel-header"><button class="travel-back" data-page="home">← BACK HOME</button><div><small>TRAVEL_LIBRARY.exe / 旅行日志</small><h2>My Travel Bookshelf <span>✈</span></h2><p>从书架上选一本，翻开一段旅程。</p></div><div class="travel-stamp">LACEY'S<br>TRAVEL<br>ARCHIVE</div></div>
+        <div class="shelf-scene" aria-label="旅行日志书架">
+          <div class="shelf-wall"><span class="wall-note">CLICK A BOOK TO OPEN　↘</span><span class="postcard">BON<br>VOYAGE<br><i>♡</i></span><span class="airmail">PAR AVION</span></div>
+          <div class="bookshelf">
+            <div class="shelf-row upper-row">
+              <button class="travel-book rose" data-book="paris"><span class="book-top"></span><span class="book-spine"><small>01</small><b>PARIS</b><i>2025</i></span><span class="book-pages"></span></button>
+              <button class="travel-book aqua" data-book="iceland"><span class="book-top"></span><span class="book-spine"><small>02</small><b>ICELAND</b><i>2025</i></span><span class="book-pages"></span></button>
+              <button class="travel-book violet" data-book="europe"><span class="book-top"></span><span class="book-spine"><small>03</small><b>EUROPE</b><i>2025</i></span><span class="book-pages"></span></button>
+              <div class="shelf-object camera" aria-hidden="true"><i></i><b>●</b></div>
+            </div><div class="wood-shelf shelf-one"><i></i></div>
+            <div class="shelf-row lower-row">
+              <button class="travel-book lemon short" data-book="asia"><span class="book-top"></span><span class="book-spine"><small>04</small><b>ASIA</b><i>SOON</i></span><span class="book-pages"></span></button>
+              <button class="travel-book pink wide" data-book="moments"><span class="book-top"></span><span class="book-spine"><small>05</small><b>LITTLE MOMENTS</b><i>SOON</i></span><span class="book-pages"></span></button>
+              <div class="shelf-object globe" aria-hidden="true"><span>⌁</span></div>
+            </div><div class="wood-shelf shelf-two"><i></i></div>
+            <div class="cabinet"><span>TRAVEL NOTES</span><i></i><i></i></div>
+          </div>
+        </div>
+        <p class="shelf-caption">* 目前为交互展示版，旅行文字与照片将在下一步补充。</p>
       </article>
       <article class="page" data-content="work"><div class="page-heading"><small>PROJECT_FOLDER / 作品文件夹</small><h2>Selected Works <span>03</span></h2><p>部分作品，但也是因为太忙没更新版。</p><div class="github-note"><span>虽然这里还没有更新，但是可以先去我的 GitHub 主页看看 ✦</span><a href="https://github.com/Laceyxinx" target="_blank" rel="noopener noreferrer"><b>♡</b> VISIT MY GITHUB <i>↗</i></a></div></div><div class="file-grid"><div class="file pink"><b>01</b><h3>心事日记 APP</h3><p>UI / UX · 2026</p><span>OPEN ↗</span></div><div class="file blue"><b>02</b><h3>Pocket Beat</h3><p>BRANDING · 2025</p><span>OPEN ↗</span></div><div class="file lilac"><b>03</b><h3>云朵收藏计划</h3><p>VISUAL · 2025</p><span>OPEN ↗</span></div></div></article>
       <article class="page active" data-content="about"><div class="page-heading"><small>PROFILE.txt / 个人资料</small><h2>About Lacey <span>♡</span></h2></div><div class="about-sheet"><img src="assets/lacey-photo.jpg" alt="Lacey 的照片"><div><h3>谢谢你点进我的主页，我是骆锦昕Lacey🥰。</h3><p>我是一个typically entp，喜欢研究新技术，也喜欢研究人。我喜欢小动物，家里养了两只小猫。我也很爱听各种音乐，看各种书，最近在尝试去看各种电影，势必要丰富我的书影音记录。在努力尝试环游世界，solo trip爱好者。我偶尔产出一些关于AI、互联网、性别、流行文化和生活的小东西。这个网站只是一部分的我，如果想了解我，可以通过我的联系方式来接触real的我。</p><dl><div><dt>LOCATION</dt><dd>全球</dd></div><div><dt>FOCUS</dt><dd>AI · 互联网 · 时事</dd></div><div><dt>STATUS</dt><dd>独身主义者</dd></div></dl><div class="skill-tags"><span>ENTP</span><span>AI</span><span>互联网</span><span>书影音</span><span>旅行</span><span>猫</span></div></div></div></article>
@@ -39,4 +60,4 @@
     </section>
   </div>
   <footer><span>© 2026 LACEY / 骆锦昕</span><span>MADE WITH LOVE, PIXELS &amp; TOO MUCH PINK</span></footer>
-</main><div class="cursor"></div><script src="script.js?v=20260831-2"></script></body></html>
+</main><div class="book-overlay" id="book-overlay" aria-hidden="true"><div class="open-book" role="dialog" aria-modal="true" aria-labelledby="book-title"><button class="book-close" type="button" aria-label="关闭旅行日志">×</button><div class="paper left-paper"><span class="corner-tape"></span><small>TRAVEL LOG / <b id="book-number">01</b></small><div class="photo-slot"><span>PHOTO<br>COMING SOON</span></div><p class="photo-caption">A MOMENT WORTH KEEPING ♡</p><div class="page-no">01</div></div><div class="book-rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="paper right-paper"><small>LACEY'S TRAVEL ARCHIVE</small><h2 id="book-title">PARIS</h2><p id="book-intro">这本旅行日志正在等待内容。</p><div class="diary-lines"><span></span><span></span><span></span><span></span><span></span></div><div class="book-meta"><span id="book-year">2025</span><i>✦</i><span>TO BE CONTINUED</span></div><div class="page-no">02</div></div><button class="page-turn prev-page" type="button" aria-label="上一本">←</button><button class="page-turn next-page" type="button" aria-label="下一本">→</button></div></div><div class="cursor"></div><script src="script.js?v=20260901-1"></script></body></html>
