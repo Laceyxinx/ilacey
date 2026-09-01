@@ -205,30 +205,43 @@ function turnPage(direction) {
   flipSheet.classList.remove('turn-next', 'turn-prev');
   void flipSheet.offsetWidth;
   flipSheet.classList.add(direction > 0 ? 'turn-next' : 'turn-prev');
-  setTimeout(() => renderSpread(target), 430);
+  setTimeout(() => renderSpread(target), 520);
   setTimeout(() => {
     flipSheet.classList.remove('turn-next', 'turn-prev');
     pageIsTurning = false;
-  }, 920);
+  }, 1080);
 }
 
-function flyBookToCenter(sourceBook) {
-  const rect = sourceBook.getBoundingClientRect();
-  const clone = sourceBook.cloneNode(true);
-  clone.classList.add('flying-book');
-  clone.style.left = `${rect.left}px`;
-  clone.style.top = `${rect.top}px`;
-  clone.style.width = `${rect.width}px`;
-  clone.style.height = `${rect.height}px`;
-  document.body.appendChild(clone);
-  const targetX = innerWidth / 2 - (rect.left + rect.width / 2);
-  const targetY = innerHeight / 2 - (rect.top + rect.height / 2);
-  const animation = clone.animate([
-    { transform: 'translate3d(0,0,0) rotateY(0) scale(1)', opacity: 1 },
-    { transform: `translate3d(${targetX * .65}px,${targetY * .65}px,120px) rotateY(-28deg) scale(1.7)`, opacity: 1, offset: .62 },
-    { transform: `translate3d(${targetX}px,${targetY}px,220px) rotateY(-88deg) scale(2.3)`, opacity: .2 }
-  ], { duration: 720, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'forwards' });
-  return animation.finished.finally(() => clone.remove());
+async function flyBookToCenter(sourceBook) {
+  const sourceRect = sourceBook.getBoundingClientRect();
+  const openBookRect = document.querySelector('.open-book').getBoundingClientRect();
+  const closedWidth = (openBookRect.width - 34) / 2;
+  const closedLeft = openBookRect.left + openBookRect.width / 2 + 17;
+  const color = getComputedStyle(sourceBook).getPropertyValue('--book').trim() || '#efa0c8';
+  const volume = document.createElement('div');
+  volume.className = 'flight-volume';
+  volume.style.setProperty('--flight-color', color);
+  volume.style.left = `${sourceRect.left}px`;
+  volume.style.top = `${sourceRect.top}px`;
+  volume.style.width = `${sourceRect.width}px`;
+  volume.style.height = `${sourceRect.height}px`;
+  volume.innerHTML = `<div class="flight-page-block"></div><div class="flight-cover"><span>${currentBook.title}</span></div><div class="flight-spine"></div>`;
+  document.body.appendChild(volume);
+  sourceBook.style.opacity = '0';
+
+  const extraction = volume.animate([
+    { left: `${sourceRect.left}px`, top: `${sourceRect.top}px`, width: `${sourceRect.width}px`, height: `${sourceRect.height}px`, transform: 'translateZ(0) rotateY(0) rotateZ(0)', offset: 0 },
+    { left: `${sourceRect.left + 18}px`, top: `${sourceRect.top - 24}px`, width: `${sourceRect.width * 1.08}px`, height: `${sourceRect.height * 1.08}px`, transform: 'translateZ(55px) rotateY(-22deg) rotateZ(-2deg)', offset: .24 },
+    { left: `${closedLeft}px`, top: `${openBookRect.top}px`, width: `${closedWidth}px`, height: `${openBookRect.height}px`, transform: 'translateZ(130px) rotateY(-8deg) rotateZ(0)', offset: .78 },
+    { left: `${closedLeft}px`, top: `${openBookRect.top}px`, width: `${closedWidth}px`, height: `${openBookRect.height}px`, transform: 'translateZ(0) rotateY(0) rotateZ(0)', offset: 1 }
+  ], { duration: 920, easing: 'cubic-bezier(.18,.75,.18,1)', fill: 'forwards' });
+  await extraction.finished;
+
+  bookOverlay.classList.add('revealing');
+  volume.classList.add('opening');
+  await new Promise(resolve => setTimeout(resolve, 940));
+  volume.remove();
+  sourceBook.style.opacity = '';
 }
 
 async function openTravelBook(id, sourceBook) {
@@ -239,13 +252,13 @@ async function openTravelBook(id, sourceBook) {
   bookOverlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('book-is-open');
   await flyBookToCenter(sourceBook);
-  bookOverlay.classList.remove('preparing');
+  bookOverlay.classList.remove('preparing', 'revealing');
   bookOverlay.classList.add('open');
   document.querySelector('.book-close').focus();
 }
 
 function closeTravelBook() {
-  bookOverlay.classList.remove('open', 'preparing');
+  bookOverlay.classList.remove('open', 'preparing', 'revealing');
   bookOverlay.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('book-is-open');
 }
