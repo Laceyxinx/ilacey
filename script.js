@@ -136,54 +136,132 @@ document.querySelectorAll('button, a').forEach(element => {
 });
 
 const travelBooks = [
-  { id: 'paris', number: '01', title: 'PARIS', year: '2025', intro: '巴黎旅行日志正在等待你的照片与故事。' },
-  { id: 'iceland', number: '02', title: 'ICELAND', year: '2025', intro: '冰岛旅行日志正在等待你的照片与故事。' },
-  { id: 'europe', number: '03', title: 'EUROPE', year: '2025', intro: '欧洲旅行日志正在等待你的照片与故事。' },
-  { id: 'asia', number: '04', title: 'ASIA', year: 'SOON', intro: '这本旅行日志还没有开始书写。' },
-  { id: 'moments', number: '05', title: 'LITTLE MOMENTS', year: 'SOON', intro: '这里将收藏路途中不起眼但舍不得忘记的瞬间。' }
+  { id: 'paris', number: '01', title: 'PARIS', year: '2025', pages: [
+    { intro: '巴黎旅行日志正在等待你的照片与故事。', caption: 'A MOMENT WORTH KEEPING ♡' },
+    { intro: '第二篇内页将记录街道、展览与偶然遇见的风景。', caption: 'WALKING WITHOUT A MAP' },
+    { intro: '最后一篇内页留给旅程结束后仍然记得的细节。', caption: 'POSTCARDS FROM PARIS' }
+  ]},
+  { id: 'iceland', number: '02', title: 'ICELAND', year: '2025', pages: [
+    { intro: '冰岛旅行日志正在等待你的照片与故事。', caption: 'LAND OF WIND & WATER' },
+    { intro: '这一页将记录公路、天气和沿途停下来的理由。', caption: 'SOMEWHERE ON THE ROAD' },
+    { intro: '这一页留给冰岛旅程中最难忘的一天。', caption: 'A DAY TO REMEMBER' }
+  ]},
+  { id: 'europe', number: '03', title: 'EUROPE', year: '2025', pages: [
+    { intro: '欧洲旅行日志正在等待你的照片与故事。', caption: 'NOTES ACROSS EUROPE' },
+    { intro: '这一页将收录城市之间的火车、车票和短暂停留。', caption: 'BETWEEN TWO CITIES' },
+    { intro: '这一页留给没有出现在计划里的惊喜。', caption: 'THE UNPLANNED PART' }
+  ]},
+  { id: 'asia', number: '04', title: 'ASIA', year: 'SOON', pages: [
+    { intro: '这本旅行日志还没有开始书写。', caption: 'A NEW CHAPTER SOON' },
+    { intro: '未来的路线、照片和故事会放在这里。', caption: 'PLACES ON MY LIST' }
+  ]},
+  { id: 'moments', number: '05', title: 'LITTLE MOMENTS', year: 'SOON', pages: [
+    { intro: '这里将收藏路途中不起眼但舍不得忘记的瞬间。', caption: 'SMALL THINGS I KEPT' },
+    { intro: '可能是一顿饭、一张车票，或某个刚好经过的人。', caption: 'FOUND ALONG THE WAY' }
+  ]}
 ];
 const bookOverlay = document.getElementById('book-overlay');
 const bookTitle = document.getElementById('book-title');
 const bookNumber = document.getElementById('book-number');
 const bookYear = document.getElementById('book-year');
 const bookIntro = document.getElementById('book-intro');
-let openBookIndex = 0;
+const photoCaption = document.getElementById('photo-caption');
+const leftPageNumber = document.getElementById('left-page-number');
+const rightPageNumber = document.getElementById('right-page-number');
+const spreadStatus = document.getElementById('spread-status');
+const flipSheet = document.querySelector('.flip-sheet');
+const previousPageButton = document.querySelector('.prev-page');
+const nextPageButton = document.querySelector('.next-page');
+let currentBook = travelBooks[0];
+let currentSpread = 0;
+let pageIsTurning = false;
 
-function renderBook(index) {
-  openBookIndex = (index + travelBooks.length) % travelBooks.length;
-  const book = travelBooks[openBookIndex];
-  bookTitle.textContent = book.title;
-  bookNumber.textContent = book.number;
-  bookYear.textContent = book.year;
-  bookIntro.textContent = book.intro;
+function renderSpread(index) {
+  currentSpread = Math.max(0, Math.min(index, currentBook.pages.length - 1));
+  const page = currentBook.pages[currentSpread];
+  const leftNumber = currentSpread * 2 + 1;
+  bookTitle.textContent = currentBook.title;
+  bookNumber.textContent = currentBook.number;
+  bookYear.textContent = currentBook.year;
+  bookIntro.textContent = page.intro;
+  photoCaption.textContent = page.caption;
+  leftPageNumber.textContent = String(leftNumber).padStart(2, '0');
+  rightPageNumber.textContent = String(leftNumber + 1).padStart(2, '0');
+  spreadStatus.textContent = `PAGE ${currentSpread + 1} / ${currentBook.pages.length}`;
+  previousPageButton.disabled = currentSpread === 0;
+  nextPageButton.disabled = currentSpread === currentBook.pages.length - 1;
+  document.querySelectorAll('.paper').forEach(pageElement => {
+    pageElement.classList.remove('page-changing');
+    void pageElement.offsetWidth;
+    pageElement.classList.add('page-changing');
+  });
 }
 
-function openTravelBook(id) {
-  const index = travelBooks.findIndex(book => book.id === id);
-  renderBook(index < 0 ? 0 : index);
-  bookOverlay.classList.add('open');
+function turnPage(direction) {
+  if (pageIsTurning) return;
+  const target = currentSpread + direction;
+  if (target < 0 || target >= currentBook.pages.length) return;
+  pageIsTurning = true;
+  flipSheet.classList.remove('turn-next', 'turn-prev');
+  void flipSheet.offsetWidth;
+  flipSheet.classList.add(direction > 0 ? 'turn-next' : 'turn-prev');
+  setTimeout(() => renderSpread(target), 430);
+  setTimeout(() => {
+    flipSheet.classList.remove('turn-next', 'turn-prev');
+    pageIsTurning = false;
+  }, 920);
+}
+
+function flyBookToCenter(sourceBook) {
+  const rect = sourceBook.getBoundingClientRect();
+  const clone = sourceBook.cloneNode(true);
+  clone.classList.add('flying-book');
+  clone.style.left = `${rect.left}px`;
+  clone.style.top = `${rect.top}px`;
+  clone.style.width = `${rect.width}px`;
+  clone.style.height = `${rect.height}px`;
+  document.body.appendChild(clone);
+  const targetX = innerWidth / 2 - (rect.left + rect.width / 2);
+  const targetY = innerHeight / 2 - (rect.top + rect.height / 2);
+  const animation = clone.animate([
+    { transform: 'translate3d(0,0,0) rotateY(0) scale(1)', opacity: 1 },
+    { transform: `translate3d(${targetX * .65}px,${targetY * .65}px,120px) rotateY(-28deg) scale(1.7)`, opacity: 1, offset: .62 },
+    { transform: `translate3d(${targetX}px,${targetY}px,220px) rotateY(-88deg) scale(2.3)`, opacity: .2 }
+  ], { duration: 720, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'forwards' });
+  return animation.finished.finally(() => clone.remove());
+}
+
+async function openTravelBook(id, sourceBook) {
+  currentBook = travelBooks.find(book => book.id === id) || travelBooks[0];
+  currentSpread = 0;
+  renderSpread(0);
+  bookOverlay.classList.add('preparing');
   bookOverlay.setAttribute('aria-hidden', 'false');
   document.body.classList.add('book-is-open');
+  await flyBookToCenter(sourceBook);
+  bookOverlay.classList.remove('preparing');
+  bookOverlay.classList.add('open');
   document.querySelector('.book-close').focus();
 }
 
 function closeTravelBook() {
-  bookOverlay.classList.remove('open');
+  bookOverlay.classList.remove('open', 'preparing');
   bookOverlay.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('book-is-open');
 }
 
 document.querySelectorAll('[data-book]').forEach(book => {
-  book.addEventListener('click', () => openTravelBook(book.dataset.book));
+  book.addEventListener('click', () => openTravelBook(book.dataset.book, book));
 });
 document.querySelector('.book-close').addEventListener('click', closeTravelBook);
-document.querySelector('.prev-page').addEventListener('click', () => renderBook(openBookIndex - 1));
-document.querySelector('.next-page').addEventListener('click', () => renderBook(openBookIndex + 1));
+previousPageButton.addEventListener('click', () => turnPage(-1));
+nextPageButton.addEventListener('click', () => turnPage(1));
 bookOverlay.addEventListener('click', event => {
   if (event.target === bookOverlay) closeTravelBook();
 });
 addEventListener('keydown', event => {
-  if (event.key === 'Escape' && bookOverlay.classList.contains('open')) closeTravelBook();
-  if (event.key === 'ArrowLeft' && bookOverlay.classList.contains('open')) renderBook(openBookIndex - 1);
-  if (event.key === 'ArrowRight' && bookOverlay.classList.contains('open')) renderBook(openBookIndex + 1);
+  if (!bookOverlay.classList.contains('open')) return;
+  if (event.key === 'Escape') closeTravelBook();
+  if (event.key === 'ArrowLeft') turnPage(-1);
+  if (event.key === 'ArrowRight') turnPage(1);
 });
