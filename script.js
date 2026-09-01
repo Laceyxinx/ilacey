@@ -170,6 +170,7 @@ const leftPageNumber = document.getElementById('left-page-number');
 const rightPageNumber = document.getElementById('right-page-number');
 const spreadStatus = document.getElementById('spread-status');
 const flipSheet = document.querySelector('.flip-sheet');
+const openBook = document.querySelector('.open-book');
 const previousPageButton = document.querySelector('.prev-page');
 const nextPageButton = document.querySelector('.next-page');
 let currentBook = travelBooks[0];
@@ -202,44 +203,48 @@ function turnPage(direction) {
   const target = currentSpread + direction;
   if (target < 0 || target >= currentBook.pages.length) return;
   pageIsTurning = true;
-  flipSheet.classList.remove('turn-next', 'turn-prev');
-  void flipSheet.offsetWidth;
-  flipSheet.classList.add(direction > 0 ? 'turn-next' : 'turn-prev');
-  setTimeout(() => renderSpread(target), 520);
-  setTimeout(() => {
-    flipSheet.classList.remove('turn-next', 'turn-prev');
+  flipSheet.classList.toggle('from-left', direction < 0);
+  flipSheet.classList.add('is-turning');
+  animatePageTurn(0, 1, 520, () => {
+    renderSpread(target);
+    flipSheet.classList.remove('is-turning', 'from-left');
+    flipSheet.style.setProperty('--turn', 0);
+    flipSheet.style.setProperty('--bend', 0);
     pageIsTurning = false;
-  }, 1080);
+  });
+}
+
+function setTurnProgress(value) {
+  const progress = Math.max(0, Math.min(1, value));
+  flipSheet.style.setProperty('--turn', progress);
+  flipSheet.style.setProperty('--bend', Math.sin(progress * Math.PI));
+}
+
+function animatePageTurn(from, to, duration, done) {
+  const started = performance.now();
+  const frame = now => {
+    const elapsed = Math.min(1, (now - started) / duration);
+    const eased = 1 - Math.pow(1 - elapsed, 3);
+    setTurnProgress(from + (to - from) * eased);
+    if (elapsed < 1) requestAnimationFrame(frame);
+    else if (done) done();
+  };
+  requestAnimationFrame(frame);
 }
 
 async function flyBookToCenter(sourceBook) {
   const sourceRect = sourceBook.getBoundingClientRect();
-  const openBookRect = document.querySelector('.open-book').getBoundingClientRect();
-  const closedWidth = (openBookRect.width - 34) / 2;
-  const closedLeft = openBookRect.left + openBookRect.width / 2 + 17;
-  const color = getComputedStyle(sourceBook).getPropertyValue('--book').trim() || '#efa0c8';
-  const volume = document.createElement('div');
-  volume.className = 'flight-volume';
-  volume.style.setProperty('--flight-color', color);
-  volume.style.left = `${sourceRect.left}px`;
-  volume.style.top = `${sourceRect.top}px`;
-  volume.style.width = `${sourceRect.width}px`;
-  volume.style.height = `${sourceRect.height}px`;
-  volume.innerHTML = `<div class="flight-page-block"></div><div class="flight-cover"><span>${currentBook.title}</span></div><div class="flight-spine"></div>`;
+  const volume = sourceBook.cloneNode(true);
+  const dx = innerWidth / 2 - sourceRect.left - sourceRect.width / 2;
+  const dy = innerHeight / 2 - sourceRect.top - sourceRect.height / 2;
+  volume.classList.add('book-flight-simple');
+  Object.assign(volume.style,{left:`${sourceRect.left}px`,top:`${sourceRect.top}px`,width:`${sourceRect.width}px`,height:`${sourceRect.height}px`});
   document.body.appendChild(volume);
   sourceBook.style.opacity = '0';
-
-  const extraction = volume.animate([
-    { left: `${sourceRect.left}px`, top: `${sourceRect.top}px`, width: `${sourceRect.width}px`, height: `${sourceRect.height}px`, transform: 'translateZ(0) rotateY(0) rotateZ(0)', offset: 0 },
-    { left: `${sourceRect.left + 18}px`, top: `${sourceRect.top - 24}px`, width: `${sourceRect.width * 1.08}px`, height: `${sourceRect.height * 1.08}px`, transform: 'translateZ(55px) rotateY(-22deg) rotateZ(-2deg)', offset: .24 },
-    { left: `${closedLeft}px`, top: `${openBookRect.top}px`, width: `${closedWidth}px`, height: `${openBookRect.height}px`, transform: 'translateZ(130px) rotateY(-8deg) rotateZ(0)', offset: .78 },
-    { left: `${closedLeft}px`, top: `${openBookRect.top}px`, width: `${closedWidth}px`, height: `${openBookRect.height}px`, transform: 'translateZ(0) rotateY(0) rotateZ(0)', offset: 1 }
-  ], { duration: 920, easing: 'cubic-bezier(.18,.75,.18,1)', fill: 'forwards' });
-  await extraction.finished;
-
+  await volume.animate([{transform:'translate3d(0,0,0) rotateY(0) scale(1)',opacity:1},{transform:`translate3d(${dx}px,${dy}px,0) rotateY(-7deg) scale(1.62)`,opacity:1}],{duration:500,easing:'cubic-bezier(.2,.8,.18,1)',fill:'forwards'}).finished;
   bookOverlay.classList.add('revealing');
-  volume.classList.add('opening');
-  await new Promise(resolve => setTimeout(resolve, 940));
+  volume.animate([{transform:`translate3d(${dx}px,${dy}px,0) scale(1.62)`,opacity:1},{transform:`translate3d(${dx}px,${dy}px,0) scale(1.82,1.55)`,opacity:0}],{duration:280,easing:'ease-out',fill:'forwards'});
+  await new Promise(resolve => setTimeout(resolve, 300));
   volume.remove();
   sourceBook.style.opacity = '';
 }
@@ -269,6 +274,46 @@ document.querySelectorAll('[data-book]').forEach(book => {
 document.querySelector('.book-close').addEventListener('click', closeTravelBook);
 previousPageButton.addEventListener('click', () => turnPage(-1));
 nextPageButton.addEventListener('click', () => turnPage(1));
+
+let pageGesture = null;
+let gestureFrame = 0;
+openBook.addEventListener('pointerdown', event => {
+  if (pageIsTurning || event.target.closest('button')) return;
+  const rect = openBook.getBoundingClientRect();
+  const direction = event.clientX >= rect.left + rect.width / 2 ? 1 : -1;
+  const target = currentSpread + direction;
+  if (target < 0 || target >= currentBook.pages.length) return;
+  pageGesture = { id: event.pointerId, startX: event.clientX, direction, target, progress: 0 };
+  pageIsTurning = true;
+  openBook.classList.add('page-gesture');
+  flipSheet.classList.toggle('from-left', direction < 0);
+  flipSheet.classList.add('is-turning');
+  openBook.setPointerCapture(event.pointerId);
+});
+
+openBook.addEventListener('pointermove', event => {
+  if (!pageGesture || event.pointerId !== pageGesture.id) return;
+  const distance = pageGesture.direction > 0 ? pageGesture.startX - event.clientX : event.clientX - pageGesture.startX;
+  pageGesture.progress = Math.max(0, Math.min(1, distance / (openBook.clientWidth * .42)));
+  cancelAnimationFrame(gestureFrame);
+  gestureFrame = requestAnimationFrame(() => setTurnProgress(pageGesture ? pageGesture.progress : 0));
+});
+
+function finishPageGesture(event) {
+  if (!pageGesture || event.pointerId !== pageGesture.id) return;
+  const gesture = pageGesture;
+  pageGesture = null;
+  openBook.classList.remove('page-gesture');
+  const completes = gesture.progress > .28;
+  animatePageTurn(gesture.progress, completes ? 1 : 0, completes ? 260 : 220, () => {
+    if (completes) renderSpread(gesture.target);
+    flipSheet.classList.remove('is-turning', 'from-left');
+    setTurnProgress(0);
+    pageIsTurning = false;
+  });
+}
+openBook.addEventListener('pointerup', finishPageGesture);
+openBook.addEventListener('pointercancel', finishPageGesture);
 bookOverlay.addEventListener('click', event => {
   if (event.target === bookOverlay) closeTravelBook();
 });
