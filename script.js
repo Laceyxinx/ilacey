@@ -191,11 +191,13 @@ function renderSpread(index) {
   spreadStatus.textContent = `PAGE ${currentSpread + 1} / ${currentBook.pages.length}`;
   previousPageButton.disabled = currentSpread === 0;
   nextPageButton.disabled = currentSpread === currentBook.pages.length - 1;
-  document.querySelectorAll('.paper').forEach(pageElement => {
-    pageElement.classList.remove('page-changing');
-    void pageElement.offsetWidth;
-    pageElement.classList.add('page-changing');
-  });
+}
+
+function prepareTurningSheet(direction) {
+  const sourcePage = document.querySelector(direction > 0 ? '.right-paper' : '.left-paper');
+  const front = flipSheet.querySelector('.flip-front');
+  front.innerHTML = sourcePage.innerHTML;
+  front.classList.toggle('turning-left-content', direction < 0);
 }
 
 function turnPage(direction) {
@@ -203,10 +205,17 @@ function turnPage(direction) {
   const target = currentSpread + direction;
   if (target < 0 || target >= currentBook.pages.length) return;
   pageIsTurning = true;
+  let contentReady = false;
+  prepareTurningSheet(direction);
   flipSheet.classList.toggle('from-left', direction < 0);
   flipSheet.classList.add('is-turning');
-  animatePageTurn(0, 1, 520, () => {
-    renderSpread(target);
+  animatePageTurn(0, 1, 480, progress => {
+    if (!contentReady && progress >= .52) {
+      contentReady = true;
+      renderSpread(target);
+    }
+  }, () => {
+    if (!contentReady) renderSpread(target);
     flipSheet.classList.remove('is-turning', 'from-left');
     flipSheet.style.setProperty('--turn', 0);
     flipSheet.style.setProperty('--bend', 0);
@@ -220,12 +229,14 @@ function setTurnProgress(value) {
   flipSheet.style.setProperty('--bend', Math.sin(progress * Math.PI));
 }
 
-function animatePageTurn(from, to, duration, done) {
+function animatePageTurn(from, to, duration, update, done) {
   const started = performance.now();
   const frame = now => {
     const elapsed = Math.min(1, (now - started) / duration);
     const eased = 1 - Math.pow(1 - elapsed, 3);
-    setTurnProgress(from + (to - from) * eased);
+    const progress = from + (to - from) * eased;
+    setTurnProgress(progress);
+    if (update) update(progress);
     if (elapsed < 1) requestAnimationFrame(frame);
     else if (done) done();
   };
@@ -285,6 +296,7 @@ openBook.addEventListener('pointerdown', event => {
   if (target < 0 || target >= currentBook.pages.length) return;
   pageGesture = { id: event.pointerId, startX: event.clientX, direction, target, progress: 0 };
   pageIsTurning = true;
+  prepareTurningSheet(direction);
   openBook.classList.add('page-gesture');
   flipSheet.classList.toggle('from-left', direction < 0);
   flipSheet.classList.add('is-turning');
@@ -305,8 +317,18 @@ function finishPageGesture(event) {
   pageGesture = null;
   openBook.classList.remove('page-gesture');
   const completes = gesture.progress > .28;
-  animatePageTurn(gesture.progress, completes ? 1 : 0, completes ? 260 : 220, () => {
-    if (completes) renderSpread(gesture.target);
+  let contentReady = false;
+  if (completes && gesture.progress >= .52) {
+    renderSpread(gesture.target);
+    contentReady = true;
+  }
+  animatePageTurn(gesture.progress, completes ? 1 : 0, completes ? 240 : 190, progress => {
+    if (completes && !contentReady && progress >= .52) {
+      renderSpread(gesture.target);
+      contentReady = true;
+    }
+  }, () => {
+    if (completes && !contentReady) renderSpread(gesture.target);
     flipSheet.classList.remove('is-turning', 'from-left');
     setTurnProgress(0);
     pageIsTurning = false;
